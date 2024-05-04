@@ -1,0 +1,262 @@
+getgenv().autoFarm = false
+getgenv().collectHoops = false
+getgenv().autoRebirth = false
+getgenv().openCrystals = false
+getgenv().joinRace = false
+-- data
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character
+local HumanoidRootPart = Character.HumanoidRootPart
+local Char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+LocalPlayer.CharacterAdded:Connect(function(Character)
+    repeat wait() until Character:FindFirstChild("HumanoidRootPart")
+    HumanoidRootPart = Character.HumanoidRootPart
+end)
+local playerTable = {}
+for i,v in pairs(Players:GetChildren()) do
+    table.insert(playerTable, v.Name)
+end
+-- ui
+loadstring(game:HttpGet(("https://raw.githubusercontent.com/Braistein/UI/main/MotLib")))()
+MakeWindow({
+    Hub = {
+      Title = "Motto HUB | Legends Of Speed",
+      Animation = "by : Motto Hub"
+    },
+    Key = {
+      KeySystem = false,
+      Title = "Key System",
+      Description = "",
+      KeyLink = "",
+      Keys = {"1234"},
+      Notifi = {
+        Notifications = true,
+        CorrectKey = "Running the Script...",
+        Incorrectkey = "The key is incorrect",
+        CopyKeyLink = "Copied to Clipboard"
+      }
+    }
+})
+MinimizeButton({
+    Image = "rbxassetid://16405119588",
+    Size = {30, 30},
+    Color = Color3.fromRGB(10, 10, 10),
+    Corner = true,
+    Stroke = true,
+    StrokeColor = Color3.fromRGB(255, 49, 49)
+})
+-- pages
+local FarmPage = MakeTab({Name = "Farm"})
+local CrystalPage = MakeTab({Name = "Crystal"})
+local PlayerPage = MakeTab({Name = "PlayerPage"})
+local CreditsPage = MakeTab({Name = "Credits"})
+-- farm
+local FarmLabel = AddTextLabel(FarmPage, "Farm Settings")
+SetLabel(FarmLabel, "Farm Settings")
+local Toggle = AddToggle(FarmPage, {
+    Name = "Auto Orb Farm",
+    Default = false,
+    Callback = function(value)
+        getgenv().autoFarm = value
+        if value then
+            doFarm()
+        end
+    end
+})
+local Toggle = AddToggle(FarmPage, {
+    Name = "Auto Hoop Farm",
+    Default = false,
+    Callback = function(value)
+        getgenv().collectHoops = value
+        if value then
+            getHoops()
+        end
+    end
+})
+-- rebirth
+local RebirthLabel = AddTextLabel(FarmPage, "Rebirth Settings")
+SetLabel(RebirthLabel, "Rebirth Settings")
+local Toggle = AddToggle(FarmPage, {
+    Name = "Auto Rebirth",
+    Default = false,
+    Callback = function(value)
+        getgenv().autoRebirth = value
+        if value then
+            doRebirth()
+        end
+    end
+})
+-- crystal
+local CrystalLabel = AddTextLabel(CrystalPage, "Crystal Settings")
+SetLabel(CrystalLabel, "Crystal Settings")
+crystalTable = {"Blue Crystal","Electro Legend Crystal","Inferno Crystal", "Lava Crystal", "Lightning Crystal", "Purple Crystal", "Red Crystal", "Snow Crystal", "Yellow Crystal"}
+local Dropdown = AddDropdown(CrystalPage, {
+    Name = "Crystal List",
+    Options = crystalTable,
+    Default = "",
+    Callback = function(value)
+        selectedCrystal = value
+    end
+})
+local Toggle = AddToggle(CrystalPage, {
+    Name = "Auto Open Crystal",
+    Default = false,
+    Callback = function(value)
+        getgenv().openCrystals = value
+        if value then
+            getCrystal()
+        end
+    end
+})
+-- player
+local PlayerLabel = AddTextLabel(PlayerPage, "Player Settings")
+SetLabel(PlayerLabel, "Player Settings")
+local playerDropdown = AddDropdown(PlayerPage, {
+    Name = "Players",
+    Options = playerTable,
+    Default = "",
+    Callback = function(value)
+        selectedPlayerName = value
+        return value
+    end
+})
+
+AddButton(PlayerPage, {
+    Name = "Teleport to Player",
+    Callback = function()
+        if selectedPlayerName then
+            local selectedPlayer = Players:FindFirstChild(selectedPlayerName)
+            if selectedPlayer then
+                HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame
+            else
+                MakeNotifi({Title = "Warning",Text = "Player not found.",Time = 2})
+            end
+        else
+            MakeNotifi({Title = "Warning",Text = "Select player to teleport.",Time = 2})
+        end
+    end
+})
+
+local Slider = AddSlider(PlayerPage, {
+    Name = "Walk Speed",
+    MinValue = 16,
+    MaxValue = 1000,
+    Default = 25,
+    Increase = 1,
+    Callback = function(value)
+        Character.Humanoid.WalkSpeed = value
+    end
+})
+local Slider = AddSlider(PlayerPage, {
+    Name = "Jump Power",
+    MinValue = 50,
+    MaxValue = 500,
+    Default = 100,
+    Increase = 1,
+    Callback = function(value)
+        Character.Humanoid.JumpPower = value
+    end
+})
+local RaceLabel = AddTextLabel(PlayerPage, "Race Settings")
+SetLabel(RaceLabel, "Race Settings")
+local Toggle = AddToggle(PlayerPage, {
+    Name = "Auto Join Race",
+    Default = false,
+    Callback = function(value)
+        getgenv().joinRace = value
+        if value then
+            winRace()
+        end
+    end
+})
+  AddButton(PlayerPage, {
+    Name = "Teleport to Map",
+    Callback = function()
+      HumanoidRootPart.CFrame = Workspace.SpawnLocation.CFrame
+    end
+})
+AddButton(PlayerPage, {Name = "Anti AFK", Callback = function()
+    local VirtualUser=game:service'VirtualUser'
+    game:service'Players'.LocalPlayer.Idled:connect(function()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
+    end)
+    MakeNotifi({
+        Title = "Anti AFK",
+        Text = "Anti AFK Enabled",
+        Time = 2
+    })
+end})
+-- credits
+local CreditsLabel = AddTextLabel(CreditsPage, "Credits")
+SetLabel(CreditsLabel, "By Bskoe")
+AddButton(CreditsPage, {Name = "Join our Discord!", Callback = function()
+    setclipboard("https://discord.gg/aN7Q9u7ZVP")
+    MakeNotifi({
+        Title = "Discord",
+        Text = "Link Copied!",
+        Time = 2
+    })
+end})
+-- functions
+function doFarm()
+    spawn(function()
+        while autoFarm do task.wait()
+            local map = LocalPlayer.currentMap.Value
+            local CrystalTable = {"Blue Orb", "Orange Orb", "Red Orb", "Yellow Orb", "Gem"}
+            for i,v in pairs(CrystalTable) do
+                local args = {[1] = "collectOrb",[2] = v,[3] = ""..map..""}
+                game:GetService("ReplicatedStorage").rEvents.orbEvent:FireServer(unpack(args))
+            end
+        end
+    end)
+end
+
+function getHoops()
+    spawn(function()
+        while collectHoops do task.wait()
+            for i, v in pairs(workspace.Hoops:GetDescendants()) do
+                if not collectHoops then break end
+                if v:IsA("BasePart") and v:FindFirstChild("TouchInterest") then
+                    firetouchinterest(HumanoidRootPart, v, 0)
+                    firetouchinterest(HumanoidRootPart, v, 1)
+                end
+            end
+        end
+    end)
+end
+
+function doRebirth()
+    spawn(function()
+        while autoRebirth do task.wait()
+            local args = {[1] = "rebirthRequest"}
+            game:GetService("ReplicatedStorage").rEvents.rebirthEvent:FireServer(unpack(args))
+        end
+    end)
+end
+
+function getCrystal()
+    spawn(function()
+        while openCrystals do task.wait()
+            local args = {[1] = "openCrystal",[2] = ""..selectedCrystal..""}
+            game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(unpack(args))
+        end
+    end)
+end
+
+function winRace()
+    spawn(function()
+        while joinRace do task.wait()
+            for i,v in pairs(Workspace.raceMaps:GetChildren()) do     
+                if v:WaitForChild("finishPart") then
+                    local args = {[1] = "joinRace"}
+                    game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("raceEvent"):FireServer(unpack(args)) 
+                    firetouchinterest(HumanoidRootPart, v.finishPart, 0)
+                    firetouchinterest(HumanoidRootPart, v.finishPart, 1)
+                end                
+            end
+        end
+    end)
+end
